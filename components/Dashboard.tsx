@@ -2,16 +2,15 @@
 import React from 'react';
 import { 
   CheckCircle2, 
-  AlertCircle, 
   ShoppingBag, 
   Droplet, 
-  ClipboardList, 
   PlusCircle,
-  BellRing,
   Wind,
-  Activity
+  Activity,
+  CalendarDays,
+  Settings2
 } from 'lucide-react';
-import { AppState, Settings, MedicationLog, SneezingLevel, RunnyNoseLevel, CongestionLevel, ExerciseType } from '../types';
+import { AppState, Settings, MedicationLog, SneezingLevel, RunnyNoseLevel, ExerciseType } from '../types';
 
 interface DashboardProps {
   state: AppState;
@@ -34,8 +33,12 @@ const Dashboard: React.FC<DashboardProps> = ({ state, onOpenForm, onQuickConfirm
     onUpdateSettings({ ...state.settings, inventoryCount: newVal });
   };
 
-  const handleTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    onUpdateSettings({ ...state.settings, reminderTime: e.target.value });
+  const handleStartDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    onUpdateSettings({ ...state.settings, startDate: e.target.value });
+  };
+
+  const handleTotalBottlesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    onUpdateSettings({ ...state.settings, totalBottles: parseInt(e.target.value) });
   };
 
   const handleSymptomUpdate = (key: 'sneezing' | 'runnyNose' | 'congestion', val: any) => {
@@ -59,7 +62,28 @@ const Dashboard: React.FC<DashboardProps> = ({ state, onOpenForm, onQuickConfirm
 
   return (
     <div className="h-full px-5 py-4 flex flex-col gap-3 overflow-y-auto pb-10">
-      {/* 1. 今日滴药确认区 */}
+      
+      {/* 1. 脱敏治疗配置 (New Section from Settings) */}
+      <div className="bg-white rounded-[32px] p-5 shadow-sm border border-gray-100 space-y-3">
+        <div className="flex items-center gap-2">
+            <Settings2 size={16} className="text-blue-400" />
+            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">脱敏配置</span>
+        </div>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2 text-gray-600">
+            <CalendarDays size={14} />
+            <span className="text-xs font-bold">起始日期</span>
+          </div>
+          <input 
+            type="date" 
+            value={state.settings.startDate}
+            onChange={handleStartDateChange}
+            className="bg-gray-50 border-none text-[10px] font-black text-blue-600 px-3 py-1.5 rounded-xl focus:ring-0 appearance-none"
+          />
+        </div>
+      </div>
+
+      {/* 2. 今日滴药确认区 */}
       <div className="bg-white rounded-[32px] p-4 shadow-sm border border-gray-100 flex items-center justify-between shrink-0">
         <div className="flex items-center gap-3">
             <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-500 ${isTaken ? 'bg-green-100 text-green-600' : 'bg-blue-50 text-blue-500'}`}>
@@ -82,7 +106,7 @@ const Dashboard: React.FC<DashboardProps> = ({ state, onOpenForm, onQuickConfirm
         )}
       </div>
 
-      {/* 2. 症状实时记录模块 (恢复设计的模块) */}
+      {/* 3. 症状实时记录模块 */}
       <div className="bg-white rounded-[32px] p-5 shadow-sm border border-gray-100 space-y-4">
         <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -124,7 +148,7 @@ const Dashboard: React.FC<DashboardProps> = ({ state, onOpenForm, onQuickConfirm
         </div>
       </div>
 
-      {/* 3. 运动强度模块 (恢复设计的模块) */}
+      {/* 4. 运动强度模块 */}
       <div className="bg-white rounded-[32px] p-5 shadow-sm border border-gray-100 space-y-3">
         <div className="flex items-center gap-2">
             <Activity size={16} className="text-green-500" />
@@ -143,7 +167,7 @@ const Dashboard: React.FC<DashboardProps> = ({ state, onOpenForm, onQuickConfirm
         </div>
       </div>
 
-      {/* 4. 药量控制滑动条 */}
+      {/* 5. 药量控制滑动条 */}
       <div className="bg-white rounded-[32px] p-5 shadow-sm border border-gray-100 shrink-0">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
@@ -154,7 +178,7 @@ const Dashboard: React.FC<DashboardProps> = ({ state, onOpenForm, onQuickConfirm
             {inventoryValue.toFixed(1)} <span className="text-[10px] font-bold text-gray-400">瓶</span>
           </span>
         </div>
-        <div className="px-1">
+        <div className="px-1 space-y-4">
           <input 
             type="range" 
             min="0" 
@@ -164,26 +188,16 @@ const Dashboard: React.FC<DashboardProps> = ({ state, onOpenForm, onQuickConfirm
             onChange={handleSliderChange}
             className="w-full h-2.5 bg-gray-100 rounded-full appearance-none cursor-pointer accent-blue-600"
           />
-        </div>
-      </div>
-
-      {/* 5. 提醒时间快速设置 */}
-      <div className="bg-white rounded-[32px] p-4 shadow-sm border border-gray-100 shrink-0 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="bg-amber-100 p-2 rounded-2xl text-amber-600">
-            <BellRing size={18} />
-          </div>
-          <div>
-            <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest leading-none mb-1">系统闹铃时间</p>
-            <p className="text-[10px] text-gray-400 font-bold">每日准时提醒</p>
+          <div className="flex items-center justify-between pt-2 border-t border-gray-50">
+             <span className="text-[10px] font-bold text-gray-300">库存上限 (瓶)</span>
+             <input 
+                type="number" 
+                value={state.settings.totalBottles}
+                onChange={handleTotalBottlesChange}
+                className="w-12 bg-transparent text-right text-[10px] font-black text-gray-400 focus:outline-none"
+             />
           </div>
         </div>
-        <input 
-          type="time" 
-          value={state.settings.reminderTime}
-          onChange={handleTimeChange}
-          className="bg-gray-50 text-gray-900 font-black text-xl px-4 py-2 rounded-2xl border-none focus:ring-4 focus:ring-blue-50 outline-none appearance-none transition-all"
-        />
       </div>
     </div>
   );

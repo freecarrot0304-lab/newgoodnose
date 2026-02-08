@@ -25,10 +25,6 @@ export interface MedicationLog {
 }
 
 export interface Settings {
-  reminderTime: string;
-  reminderSound: string; // User selectable sound
-  vibrationEnabled: boolean;
-  soundEnabled: boolean;
   inventoryCount: number; // Support float (0.1 step)
   totalBottles: number;
   startDate: string; // YYYY-MM-DD
@@ -37,6 +33,4 @@ export interface Settings {
 export interface AppState {
   logs: MedicationLog[];
   settings: Settings;
-  isSnoozed: boolean;
-  snoozeUntil: number | null;
 }
